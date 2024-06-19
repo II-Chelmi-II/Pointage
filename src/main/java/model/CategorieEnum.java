@@ -1,5 +1,8 @@
 package model;
 
+import lombok.Getter;
+
+@Getter
 public enum CategorieEnum {
     CADRE_SUPERIEUR("Cadre Supérieur", 0, 0, 0),
     NORMAL("Normal", 40, 100000, 0),
@@ -18,19 +21,4 @@ public enum CategorieEnum {
         this.montantIndemnite = montantIndemnite;
     }
 
-    public String getNom() {
-        return nom;
-    }
-
-    public int getHeuresNormalesParSemaine() {
-        return heuresNormalesParSemaine;
-    }
-
-    public double getSalaireParSemaine() {
-        return salaireParSemaine;
-    }
-
-    public double getMontantIndemnite() {
-        return montantIndemnite;
-    }
 }
