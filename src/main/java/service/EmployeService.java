@@ -4,7 +4,6 @@ import model.Employe;
 import model.Pointage;
 import model.Calendrier;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 public class EmployeService {
@@ -23,21 +22,20 @@ public class EmployeService {
         int heuresNormales = employe.getCategorie().getType().getHeuresNormalesParSemaine();
         double tauxHoraire = employe.getCategorie().getType().getSalaireParSemaine() / heuresNormales;
 
+        int heuresParJour = 8;
+        boolean estHeuresSupp = heuresTravaillees > heuresParJour;
+
         // Calcul des heures normales
-        if (heuresTravaillees <= heuresNormales) {
-            salaire += heuresTravaillees * tauxHoraire;
-        } else {
-            salaire += heuresNormales * tauxHoraire;
-        }
+        salaire += Math.min(heuresTravaillees, heuresParJour) * tauxHoraire;
 
         // Calcul des heures supplémentaires
-        if (heuresTravaillees > heuresNormales) {
-            int heuresSupplementaires = Math.min(heuresTravaillees - heuresNormales, 20);
-            if (heuresSupplementaires <= 8) {
+        if (estHeuresSupp) {
+            int heuresSupplementaires = heuresTravaillees - heuresParJour;
+            if (heuresSupplementaires <= 4) {
                 salaire += heuresSupplementaires * tauxHoraire * 1.3;
             } else {
-                salaire += 8 * tauxHoraire * 1.3;
-                salaire += (heuresSupplementaires - 8) * tauxHoraire * 1.5;
+                salaire += 4 * tauxHoraire * 1.3;
+                salaire += (heuresSupplementaires - 4) * tauxHoraire * 1.5;
             }
         }
 
