@@ -7,7 +7,12 @@ public class Salaire {
     private double salaireBrut;
     private double salaireNet;
 
-    public void calculerSalaireNet() {
+    public Salaire(double salaireBrut) {
+        this.salaireBrut = salaireBrut;
+        calculerSalaireNet();
+    }
+
+    private void calculerSalaireNet() {
         this.salaireNet = this.salaireBrut * 0.8;
     }
 }
