@@ -1,57 +1,57 @@
 package service;
 
-import model.Employe;
-import model.Pointage;
-import model.Calendrier;
-import java.time.LocalDate;
+import model.*;
+
 import java.util.List;
 
 public class EmployeService {
 
-    public double calculerSalaireBrut(Employe employe, List<Pointage> pointages, Calendrier calendrier) {
+    public Salaire calculerSalaire(Employe employe, List<Pointage> pointages, Calendrier calendrier) {
         double salaireBrut = 0;
+
         for (Pointage pointage : pointages) {
             salaireBrut += calculerSalairePourPointage(employe, pointage, calendrier);
         }
-        return salaireBrut;
+
+        Salaire salaire = new Salaire(salaireBrut);
+        salaire.calculerSalaireNet(); // Calcul du salaire net
+
+        return salaire;
     }
 
     private double calculerSalairePourPointage(Employe employe, Pointage pointage, Calendrier calendrier) {
         double salaire = 0;
         int heuresTravaillees = pointage.getHeuresTravaillees();
-        int heuresNormales = employe.getCategorie().getType().getHeuresNormalesParSemaine();
-        double tauxHoraire = employe.getCategorie().getType().getSalaireParSemaine() / heuresNormales;
-
-        int heuresParJour = 8;
-        boolean estHeuresSupp = heuresTravaillees > heuresParJour;
+        double tauxHoraire = employe.getCategorie().getType().getSalaireParSemaine() / employe.getCategorie().getType().getHeuresNormalesParSemaine();
 
         // Calcul des heures normales
-        salaire += Math.min(heuresTravaillees, heuresParJour) * tauxHoraire;
+        salaire += heuresTravaillees * tauxHoraire;
 
         // Calcul des heures supplémentaires
-        if (estHeuresSupp) {
-            int heuresSupplementaires = heuresTravaillees - heuresParJour;
-            if (heuresSupplementaires <= 4) {
-                salaire += heuresSupplementaires * tauxHoraire * 1.3;
-            } else {
-                salaire += 4 * tauxHoraire * 1.3;
-                salaire += (heuresSupplementaires - 4) * tauxHoraire * 1.5;
+        if (!employe.getCategorie().getType().equals(CategorieEnum.CADRE_SUPERIEUR)) {
+            int heuresNormalesParSemaine = employe.getCategorie().getType().getHeuresNormalesParSemaine();
+            int heuresSupplementaires = Math.max(heuresTravaillees - heuresNormalesParSemaine, 0);
+            int heuresSupplementairesPrisesEnCompte = Math.min(heuresSupplementaires, 20); // Limite à 20h max
+            int heuresSupplementairesRestantes = heuresSupplementaires - heuresSupplementairesPrisesEnCompte;
+
+            if (heuresSupplementairesPrisesEnCompte > 0) {
+                salaire += heuresSupplementairesPrisesEnCompte * tauxHoraire * 1.3; // 130% pour les premières 8h supplémentaires
+            }
+
+            if (heuresSupplementairesRestantes > 0) {
+                salaire += heuresSupplementairesRestantes * tauxHoraire * 1.5; // 150% pour les suivantes
             }
         }
 
-        // Calcul des heures majorées
+        // Calcul des majorations pour jours fériés, travail de nuit, etc.
         if (calendrier.estJourFerie(pointage.getDate())) {
-            salaire += heuresTravaillees * tauxHoraire * 1.5;
-        } else if (pointage.getDate().getDayOfWeek().name().equals("SUNDAY")) {
-            salaire += heuresTravaillees * tauxHoraire * 1.4;
+            salaire += heuresTravaillees * tauxHoraire * 1.5; // 150% pour les jours fériés
         } else if (pointage.getHeureDebut().getHour() >= 22 || pointage.getHeureDebut().getHour() < 6) {
-            salaire += heuresTravaillees * tauxHoraire * 1.3;
+            salaire += heuresTravaillees * tauxHoraire * 1.3; // 130% pour le travail de nuit
+        } else if (pointage.getDate().getDayOfWeek().name().equals("SUNDAY")) {
+            salaire += heuresTravaillees * tauxHoraire * 1.4; // 140% pour le dimanche
         }
 
         return salaire;
-    }
-
-    public double calculerSalaireNet(double salaireBrut) {
-        return salaireBrut * 0.8;
     }
 }
