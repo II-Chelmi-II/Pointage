@@ -2,15 +2,12 @@ package model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class Pointage {
     private Employe employe;
     private LocalDate date;
@@ -20,7 +17,6 @@ public class Pointage {
     private boolean estNuit;
 
     public int getHeuresTravaillees() {
-        Duration dureeTravail = Duration.between(heureDebut, heureFin);
-        return (int) dureeTravail.toHours();
+        return (int) java.time.Duration.between(heureDebut, heureFin).toHours();
     }
 }

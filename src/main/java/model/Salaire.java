@@ -9,10 +9,9 @@ public class Salaire {
 
     public Salaire(double salaireBrut) {
         this.salaireBrut = salaireBrut;
-        calculerSalaireNet();
     }
 
-    private void calculerSalaireNet() {
+    public void calculerSalaireNet() {
         this.salaireNet = this.salaireBrut * 0.8;
     }
 }
